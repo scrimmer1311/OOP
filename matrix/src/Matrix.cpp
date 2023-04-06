@@ -33,7 +33,7 @@ void EvaluateRows(const char *input, int *rows) {
 		i++;
 	}
 	if (r_quotes != l_quotes)
-		cout << "Invalid input" << endl;
+		cerr << "Invalid input" << endl;
 	else if (l_quotes == 1 || r_quotes == 1)
 		*rows = 1;
 	else
@@ -55,7 +55,7 @@ void EvaluateShape(const char *input, int *rows, int *cols) {
 		if ((commas - *rows + 1) % (*rows) == 0)
 			*cols = ((commas - *rows + 1) / (*rows)) + 1;
 		else
-			cout << "Invalid input" << endl;
+			cerr << "Invalid input" << endl;
 	}
 }
 double** FillTwoDimArray(double **stor, const char *inp) {
@@ -134,7 +134,7 @@ Matrix::Matrix::~Matrix() {
 		delete[] storage;
 		storage = nullptr;
 	} else
-		std::cout << "This object have already been deleted" << endl;
+		std::cerr << "This object have already been deleted" << endl;
 }
 
 Matrix::Matrix(const Matrix &other) {
@@ -170,7 +170,7 @@ Matrix Matrix::diagonal(double *vals, int n) {
 }
 void Matrix::set(const int i, const int j, double val) {
 	if (i > rows || j > cols) {
-		cout << "Given index is out of bounds!" << endl;
+		cerr << "Given index is out of bounds!" << endl;
 		return;
 	}
 	storage[i - 1][j - 1] = val;
@@ -230,7 +230,7 @@ bool Matrix::operator !=(const Matrix &other) const {
 }
 Matrix Matrix::operator|(const Matrix &other) const {
 	if (rows != other.rows)
-		cout >> "Matrices dimensions should be equal";
+		cerr >> "Matrices dimensions should be equal";
 	else {
 		Matrix res(rows, cols + other.cols);
 		for (int i = 0; i < res.rows; ++i) {
@@ -246,7 +246,7 @@ Matrix Matrix::operator|(const Matrix &other) const {
 }
 Matrix Matrix::operator /(const Matrix &other) const {
 	if (cols != other.cols)
-		cout >> "Matrices dimensions should be equal";
+		cerr >> "Matrices dimensions should be equal";
 	else {
 		Matrix res(rows + other.rows, cols);
 		for (int i = 0; i < res.rows; ++i) {
@@ -260,54 +260,86 @@ Matrix Matrix::operator /(const Matrix &other) const {
 		return res;
 	}
 }
+void Matrix::swap(int from, int to, const char which) {
+	/*
+	 * Parameters:
+	 * int from: which line should be moved
+	 * int to: place of the line
+	 * const char which: selects types of line:
+	 * 		'r' - row
+	 * 		'c' - column
+	 * 		Other variants incompatible.
+	 */
+	switch (which) {
+	case 'r':
+		double *buf = new double[cols];
+		for (int j = 0; j < cols; ++j) {
+			buf[j] = storage[to][j];
+			storage[to][j] = storage[from][j];
+			storage[from][j] = buf[j];
+		}
+		delete[] buf;
+		break;
+	case 'c':
+		double *buf = new double[cols];
+		for (int j = 0; j < cols; ++j) {
+			buf[j] = storage[to][j];
+			storage[to][j] = storage[from][j];
+			storage[from][j] = buf[j];
+		}
+		delete[] buf;
+		break;
+	}
+}
 Matrix Matrix::trim(const char which, const int trim_ind) {
 	switch (which) {
 	case 'r':
 		if (trim_ind >= rows)
-			cout << "Too high index";
+			cerr << "Too high index";
 		else if (trim_ind < 0)
-			cout << "Trim index must be positive";
+			cerr << "Trim index must be positive";
 		else {
 			Matrix res(rows - trim_ind - 1, cols);
 			for (int i = 0; i < res.rows; ++i) {
 				for (int j = 0; j < res.cols; ++j)
 					res.storage[i][j] = storage[trim_ind + i][j];
 			}
+			return res;
 		}
 		break;
 	case 'c':
 		if (trim_ind >= rows)
-			cout << "Too high index";
+			cerr << "Too high index";
 		else if (trim_ind < 0)
-			cout << "Trim index must be positive";
+			cerr << "Trim index must be positive";
 		else {
 			Matrix res(rows - trim_ind - 1, cols);
 			for (int i = 0; i < res.rows; ++i) {
 				for (int j = 0; j < res.cols; ++j)
 					res.storage[i][j] = storage[trim_ind + i][j];
 			}
+			return res;
 		}
 		break;
 	default:
-		cout << "invalid trim identifier";
+		cerr << "invalid trim identifier";
 		break;
 	}
-	return res;
 }
 
 Matrix& Matrix::operator~() {
 	if (rows != cols)
-		cout << "Reverse matrix couldn't be got with unequal dimensions";
+		cerr << "Reverse matrix couldn't be got with unequal dimensions";
 	else {
 		int n = rows;
 		Matrix res(n, n);
 		res.identity(n);
 		Matrix big(n, 2 * n);
 		big = *this / res;
-
+		// Прямой ход
 		for (int k = 0; k < n; k++) {
 			for (int i = 0; i < 2 * n; i++)
-				big.storage[k][i] = big.storage[k][i] / storage[k][k];
+				big.storage[k][i] /= storage[k][k];
 			for (int i = k + 1; i < n; i++) {
 				double K = big.storage[i][k] / big.storage[k][k];
 				for (int j = 0; j < 2 * n; j++)
@@ -317,7 +349,7 @@ Matrix& Matrix::operator~() {
 				for (int j = 0; j < n; j++)
 					storage[i][j] = big.storage[i][j];
 		}
-
+		// Обратный ход
 		for (int k = n - 1; k > -1; k--) {
 			for (int i = 2 * n - 1; i > -1; i--)
 				big.storage[k][i] = big.storage[k][i] / storage[k][k];
@@ -329,6 +361,7 @@ Matrix& Matrix::operator~() {
 			}
 		}
 		res = big.trim('c', n);
+		return res;
 	}
 }
 ostream& operator<<(ostream &s, const Matrix &m) {

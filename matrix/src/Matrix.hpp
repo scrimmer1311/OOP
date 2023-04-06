@@ -20,6 +20,7 @@
 using std::ostream;
 using std::cin;
 using std::cout;
+using std::cerr;
 using std::endl;
 
 // Misc functions
@@ -79,15 +80,16 @@ public:
 	// TODO matrix += matrix ;
 	// TODO matrix - matrix ;
 	// TODO matrix -= matrix
-	Matrix operator*(const Matrix &other) const;
-	Matrix& operator*=(const Matrix &other);
+	Matrix operator*(const Matrix&) const;
+	Matrix& operator*=(const Matrix&);
 	Matrix& operator-(void); // unary minus
-	bool operator==(const Matrix &other) const;
-	bool operator!= (const Matrix &other) const;
-	Matrix operator| (const Matrix &other) const; //add to right
-	Matrix operator/ (const Matrix &other) const; //add below
-	Matrix& operator~ (void); // обратная матрица;
+	bool operator==(const Matrix&) const;
+	bool operator!=(const Matrix&) const;
+	Matrix operator|(const Matrix&) const; //add to right
+	Matrix operator/(const Matrix&) const; //add below
+	void swap(int from, int to, const char); // swaps rows or cols;
 	Matrix trim(const char, const int);
+	Matrix& operator~(void); // обратная матрица;
 	double determinant(); // определитель;
 	Matrix solve(); //
 };
