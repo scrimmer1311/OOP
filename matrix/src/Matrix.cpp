@@ -9,6 +9,7 @@
 using std::string;
 using std::ostream;
 const int dim = 1;
+double Matrix::EPS= 1.e-6 ;
 
 double** CreateTwoDimArray(int rows, int cols) {
 	double **storage = new double*[rows];
@@ -134,7 +135,7 @@ Matrix::Matrix::~Matrix() {
 		delete[] storage;
 		storage = nullptr;
 	} else
-		std::cerr << "This object have already been deleted" << endl;
+		cerr << "This object have already been deleted" << endl;
 }
 
 Matrix::Matrix(const Matrix &other) {
@@ -208,16 +209,6 @@ bool Matrix::operator ==(const Matrix &other) const {
 	return true;
 	unequal: return false;
 }
-bool Matrix::operator ==(const Matrix &other) const {
-	for (int i = 0; i < rows; ++i) {
-		for (int j = 0; j < cols; ++j) {
-			if (abs(storage[i][j] - other.storage[i][j]) < EPS)
-				goto unequal;
-		}
-	}
-	return true;
-	unequal: return false;
-}
 bool Matrix::operator !=(const Matrix &other) const {
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < cols; ++j) {
@@ -230,7 +221,7 @@ bool Matrix::operator !=(const Matrix &other) const {
 }
 Matrix Matrix::operator|(const Matrix &other) const {
 	if (rows != other.rows)
-		cerr >> "Matrices dimensions should be equal";
+		cerr << "Matrices dimensions should be equal";
 	else {
 		Matrix res(rows, cols + other.cols);
 		for (int i = 0; i < res.rows; ++i) {
@@ -246,7 +237,7 @@ Matrix Matrix::operator|(const Matrix &other) const {
 }
 Matrix Matrix::operator /(const Matrix &other) const {
 	if (cols != other.cols)
-		cerr >> "Matrices dimensions should be equal";
+		cerr << "Matrices dimensions should be equal";
 	else {
 		Matrix res(rows + other.rows, cols);
 		for (int i = 0; i < res.rows; ++i) {
@@ -271,7 +262,7 @@ void Matrix::swap(int from, int to, const char which) {
 	 * 		Other variants incompatible.
 	 */
 	switch (which) {
-	case 'r':
+	case 'r': {
 		double *buf = new double[cols];
 		for (int j = 0; j < cols; ++j) {
 			buf[j] = storage[to][j];
@@ -279,15 +270,19 @@ void Matrix::swap(int from, int to, const char which) {
 			storage[from][j] = buf[j];
 		}
 		delete[] buf;
+		buf = nullptr;
+	}
 		break;
-	case 'c':
-		double *buf = new double[cols];
-		for (int j = 0; j < cols; ++j) {
-			buf[j] = storage[to][j];
-			storage[to][j] = storage[from][j];
-			storage[from][j] = buf[j];
+	case 'c': {
+		double *buf = new double[rows];
+		for (int i = 0; i < rows; ++i) {
+			buf[i] = storage[to][i];
+			storage[to][i] = storage[from][i];
+			storage[from][i] = buf[i];
 		}
 		delete[] buf;
+		buf = nullptr;
+	}
 		break;
 	}
 }

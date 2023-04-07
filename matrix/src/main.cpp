@@ -11,8 +11,9 @@ int main (int argc, char** argv) {
 	int rows, cols;
 	EvaluateShape(inp, &rows, &cols);
 	Matrix A(5), B(2), C(B);
-	A.identity(6);
-	cout << cols << " " << rows << endl;
+	Matrix D(Matrix::identity(6));
+	cout << cols << "a " << rows << endl;
+
 	return 0;
 }
 

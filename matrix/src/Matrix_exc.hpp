@@ -12,11 +12,12 @@
 enum class Matr_exc_codes {
 
 };
-class Matrix_exception: public Matrix {
+
+class Matrix_exception {
 	Matr_exc_codes c;
 public:
 	Matrix_exception();
-	friend ostream& operator<< (ostream& s, const Matrix_exception& e);
+	friend std::ostream& operator<< (std::ostream& s, const Matrix_exception& e);
 };
 
 #endif /* MATRIX_EXC_HPP_ */

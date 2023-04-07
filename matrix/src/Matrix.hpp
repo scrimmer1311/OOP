@@ -35,7 +35,7 @@ class Matrix {
 	int cols; // количество столбцов
 	double **storage; // динамический массив для элементов матрицы
 public:
-	static double EPS = 1.e-6;
+	static double EPS;
 	// Методы надкласса
 	Matrix();
 	Matrix(const Matrix &other);
@@ -43,13 +43,13 @@ public:
 	// Подкласс и связанные с ним методы
 	class Row {
 		int cols;
-		int *&rows;
+		double *&rows;
 	public:
 		Row(int row, int cols, double **p) :
 				rows(p[row - 1]) {
 			this->cols = cols;
 		}
-		int& operator[](int i) {
+		double& operator[](int i) {
 			return rows[i - 1];
 		}
 	};
