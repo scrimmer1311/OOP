@@ -76,8 +76,8 @@ public:
 	Matrix operator*(const double &mplier);
 	Matrix& operator*=(const double &mplier);
 	friend ostream& operator<<(ostream &s, const Matrix &M);
-	Matrix operator+(Matrix &other); // TODO matrix + matrix ;
-	// TODO matrix += matrix ;
+	Matrix operator+(const Matrix &other) const; // TODO matrix + matrix ;
+	Matrix& operator+=(const Matrix &other); // TODO matrix += matrix ;
 	// TODO matrix - matrix ;
 	// TODO matrix -= matrix
 	Matrix operator*(const Matrix&) const;

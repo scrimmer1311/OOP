@@ -9,7 +9,7 @@
 using std::string;
 using std::ostream;
 const int dim = 1;
-double Matrix::EPS= 1.e-6 ;
+double Matrix::EPS = 1.e-6;
 
 double** CreateTwoDimArray(int rows, int cols) {
 	double **storage = new double*[rows];
@@ -176,6 +176,21 @@ void Matrix::set(const int i, const int j, double val) {
 	}
 	storage[i - 1][j - 1] = val;
 }
+Matrix Matrix::operator +(const Matrix &other) const {
+	Matrix res(rows, cols);
+	for (int i = 0; i < res.rows; i++) {
+		for (int j = 0; j < res.cols; j++)
+			res.storage[i][j] = storage[i][j] + other.storage[i][j];
+	}
+	return res;
+}
+Matrix& Matrix::operator +=(const Matrix &other) {
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++)
+			storage[i][j] += other.storage[i][j];
+	}
+	return *this;
+}
 Matrix Matrix::operator*(const double &mplier) {
 	Matrix res(rows, cols);
 	for (int i = 0; i < res.rows; i++) {
@@ -245,7 +260,7 @@ Matrix Matrix::operator /(const Matrix &other) const {
 				if (i < rows) {
 					res.storage[i][j] = storage[i][j];
 				} else
-					res.storage[i][j] = other.storage[i][j];
+					res.storage[i][j] = other.storage[i - rows][j];
 			}
 		}
 		return res;

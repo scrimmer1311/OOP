@@ -7,12 +7,15 @@
 #include "Matrix.hpp"
 
 int main (int argc, char** argv) {
-	const char* inp = "{{7, 59},{55, 62}}";
-	int rows, cols;
-	EvaluateShape(inp, &rows, &cols);
-	Matrix A(5), B(2), C(B);
-	Matrix D(Matrix::identity(6));
-	cout << cols << "a " << rows << endl;
+	const char* inp1 = "{{7, 59},{55, 62}}";
+	const char* inp2 = "{{7, 6},{55, 4}}";
+
+	Matrix A(inp1), B(inp2), C(Matrix::identity(2));
+	Matrix D = A + B;
+	C += B;
+	C = A /B;
+	cout << C << endl;
+
 
 	return 0;
 }
