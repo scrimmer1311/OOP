@@ -13,8 +13,10 @@ int main (int argc, char** argv) {
 	Matrix A(inp1), B(inp2), C(Matrix::identity(2));
 	Matrix D = A + B;
 	C += B;
-	C = A /B;
-	cout << C << endl;
+	C = (A / B);
+	Matrix E = C.trim('r', 0);
+	E = ~A;
+	cout << E << endl;
 
 
 	return 0;

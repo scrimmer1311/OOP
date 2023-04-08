@@ -73,6 +73,7 @@ public:
 		return cols;
 	}
 	void set(const int i, const int j, double val);
+	Matrix& operator=(const Matrix&);
 	Matrix operator*(const double &mplier);
 	Matrix& operator*=(const double &mplier);
 	friend ostream& operator<<(ostream &s, const Matrix &M);

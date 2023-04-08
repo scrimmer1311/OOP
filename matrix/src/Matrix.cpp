@@ -176,6 +176,22 @@ void Matrix::set(const int i, const int j, double val) {
 	}
 	storage[i - 1][j - 1] = val;
 }
+Matrix& Matrix::operator =(const Matrix &other) {
+	if (this == &other)
+		return *this;
+	for (int i = 0; i < rows; ++i)
+		delete[] storage[i];
+	delete[] storage;
+	rows = other.rows;
+	cols = other.cols;
+	storage = CreateTwoDimArray(other.rows, other.cols);
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j)
+			storage[i][j] = other.storage[i][j];
+	}
+	return *this;
+
+}
 Matrix Matrix::operator +(const Matrix &other) const {
 	Matrix res(rows, cols);
 	for (int i = 0; i < res.rows; i++) {
@@ -235,6 +251,7 @@ bool Matrix::operator !=(const Matrix &other) const {
 	unequal: return true;
 }
 Matrix Matrix::operator|(const Matrix &other) const {
+	Matrix result;
 	if (rows != other.rows)
 		cerr << "Matrices dimensions should be equal";
 	else {
@@ -244,13 +261,15 @@ Matrix Matrix::operator|(const Matrix &other) const {
 				if (j < cols) {
 					res.storage[i][j] = storage[i][j];
 				} else
-					res.storage[i][j] = other.storage[i][j];
+					res.storage[i][j] = other.storage[i][j - cols];
 			}
 		}
-		return res;
+		result = res;
 	}
+	return result;
 }
 Matrix Matrix::operator /(const Matrix &other) const {
+	Matrix result;
 	if (cols != other.cols)
 		cerr << "Matrices dimensions should be equal";
 	else {
@@ -263,8 +282,9 @@ Matrix Matrix::operator /(const Matrix &other) const {
 					res.storage[i][j] = other.storage[i - rows][j];
 			}
 		}
-		return res;
+		result = res;
 	}
+	return result;
 }
 void Matrix::swap(int from, int to, const char which) {
 	/*
@@ -302,6 +322,7 @@ void Matrix::swap(int from, int to, const char which) {
 	}
 }
 Matrix Matrix::trim(const char which, const int trim_ind) {
+	Matrix result;
 	switch (which) {
 	case 'r':
 		if (trim_ind >= rows)
@@ -309,32 +330,33 @@ Matrix Matrix::trim(const char which, const int trim_ind) {
 		else if (trim_ind < 0)
 			cerr << "Trim index must be positive";
 		else {
-			Matrix res(rows - trim_ind - 1, cols);
+			Matrix res(rows - trim_ind, cols);
 			for (int i = 0; i < res.rows; ++i) {
 				for (int j = 0; j < res.cols; ++j)
 					res.storage[i][j] = storage[trim_ind + i][j];
 			}
-			return res;
+			result = res;
 		}
 		break;
 	case 'c':
-		if (trim_ind >= rows)
+		if (trim_ind >=cols)
 			cerr << "Too high index";
 		else if (trim_ind < 0)
 			cerr << "Trim index must be positive";
 		else {
-			Matrix res(rows - trim_ind - 1, cols);
+			Matrix res(rows, cols- trim_ind);
 			for (int i = 0; i < res.rows; ++i) {
 				for (int j = 0; j < res.cols; ++j)
-					res.storage[i][j] = storage[trim_ind + i][j];
+					res.storage[i][j] = storage[i][trim_ind + j];
 			}
-			return res;
+			result = res;
 		}
 		break;
 	default:
 		cerr << "invalid trim identifier";
 		break;
 	}
+	return result;
 }
 
 Matrix& Matrix::operator~() {
@@ -342,10 +364,9 @@ Matrix& Matrix::operator~() {
 		cerr << "Reverse matrix couldn't be got with unequal dimensions";
 	else {
 		int n = rows;
-		Matrix res(n, n);
-		res.identity(n);
+		Matrix res = Matrix::identity(n);
 		Matrix big(n, 2 * n);
-		big = *this / res;
+		big = *this | res;
 		// Прямой ход
 		for (int k = 0; k < n; k++) {
 			for (int i = 0; i < 2 * n; i++)
@@ -371,8 +392,9 @@ Matrix& Matrix::operator~() {
 			}
 		}
 		res = big.trim('c', n);
-		return res;
+		*this = res;
 	}
+	return *this;
 }
 ostream& operator<<(ostream &s, const Matrix &m) {
 	s << std::setprecision(6);
