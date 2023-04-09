@@ -176,6 +176,16 @@ void Matrix::set(const int i, const int j, double val) {
 	}
 	storage[i - 1][j - 1] = val;
 }
+ostream& operator<<(ostream &s, const Matrix &m) {
+	s << std::setprecision(6);
+	for (int i = 0; i < m.rows; ++i) {
+		s << "|";
+		for (int j = 0; j < m.cols; ++j)
+			s << ' ' << std::setw(6) << m.storage[i][j];
+		s << " |" << endl;
+	}
+	return s;
+}
 Matrix& Matrix::operator =(const Matrix &other) {
 	if (this == &other)
 		return *this;
@@ -204,6 +214,48 @@ Matrix& Matrix::operator +=(const Matrix &other) {
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++)
 			storage[i][j] += other.storage[i][j];
+	}
+	return *this;
+}
+Matrix Matrix::operator -(const Matrix &other) const {
+	Matrix res(rows, cols);
+	for (int i = 0; i < res.rows; i++) {
+		for (int j = 0; j < res.cols; j++)
+			res.storage[i][j] = storage[i][j] - other.storage[i][j];
+	}
+	return res;
+}
+Matrix Matrix::operator*(const Matrix &other) const {
+	Matrix res(rows, other.cols);
+	if (cols != other.rows)
+		cerr
+				<< "When multiplied, matrix 1 rows quantity should be equal with matrix 2 columns quantity";
+	for (int i = 0; i < res.rows; ++i) {
+		for (int j = 0; j < res.cols; ++j) {
+			for (int k = 0; k < rows; ++k)
+				res.storage[i][j] += storage[i][k] + other.storage[k][j];
+		}
+	}
+	return res;
+}
+Matrix& Matrix::operator*=(const Matrix &other) {
+	Matrix res(rows, other.cols);
+	if (cols != other.rows)
+		cerr
+				<< "When multiplied, matrix 1 rows quantity should be equal with matrix 2 columns quantity";
+	for (int i = 0; i < res.rows; ++i) {
+		for (int j = 0; j < res.cols; ++j) {
+			for (int k = 0; k < rows; ++k)
+				res.storage[i][j] += storage[i][k] + other.storage[k][j];
+		}
+	}
+	*this = res;
+	return *this;
+}
+Matrix& Matrix::operator -=(const Matrix &other) {
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++)
+			storage[i][j] -= other.storage[i][j];
 	}
 	return *this;
 }
@@ -339,12 +391,12 @@ Matrix Matrix::trim(const char which, const int trim_ind) {
 		}
 		break;
 	case 'c':
-		if (trim_ind >=cols)
+		if (trim_ind >= cols)
 			cerr << "Too high index";
 		else if (trim_ind < 0)
 			cerr << "Trim index must be positive";
 		else {
-			Matrix res(rows, cols- trim_ind);
+			Matrix res(rows, cols - trim_ind);
 			for (int i = 0; i < res.rows; ++i) {
 				for (int j = 0; j < res.cols; ++j)
 					res.storage[i][j] = storage[i][trim_ind + j];
@@ -359,51 +411,45 @@ Matrix Matrix::trim(const char which, const int trim_ind) {
 	return result;
 }
 
+Matrix Matrix::solve(const Matrix &f) {
+	Matrix big(rows, cols + f.cols);
+	if (rows != cols)
+		cerr << "The Kronecker-Capelli theorem does not hold";
+	else {
+		// Прямой ход
+		big = *this | f;
+		for (int k = 0; k < big.rows; k++) {
+			for (int i = 0; i < big.cols; i++)
+				big.storage[k][i] /= storage[k][k];
+			for (int i = k + 1; i < big.rows; i++) {
+				double K = big.storage[i][k] / big.storage[k][k];
+				for (int j = 0; j < big.cols; j++)
+					big.storage[i][j] -= big.storage[k][j] * K;
+			}
+			for (int i = 0; i < big.rows; i++)
+				for (int j = 0; j < big.rows; j++)
+					storage[i][j] = big.storage[i][j];
+		}
+		// Обратный ход
+		for (int k = big.rows - 1; k >= 0; k--) {
+			for (int i = big.cols - 1; i >= 0; i--)
+				big.storage[k][i] /=  storage[k][k];
+			for (int i = k - 1; i >= 0; i--) {
+				double K = big.storage[i][k] / big.storage[k][k];
+				for (int j = big.cols - 1; j >= 0; j--)
+					big.storage[i][j] -= big.storage[k][j] * K;
+			}
+		}
+	}
+	return big.trim('c', rows);
+}
 Matrix& Matrix::operator~() {
 	if (rows != cols)
 		cerr << "Reverse matrix couldn't be got with unequal dimensions";
 	else {
-		int n = rows;
-		Matrix res = Matrix::identity(n);
-		Matrix big(n, 2 * n);
-		big = *this | res;
-		// Прямой ход
-		for (int k = 0; k < n; k++) {
-			for (int i = 0; i < 2 * n; i++)
-				big.storage[k][i] /= storage[k][k];
-			for (int i = k + 1; i < n; i++) {
-				double K = big.storage[i][k] / big.storage[k][k];
-				for (int j = 0; j < 2 * n; j++)
-					big.storage[i][j] -= big.storage[k][j] * K;
-			}
-			for (int i = 0; i < n; i++)
-				for (int j = 0; j < n; j++)
-					storage[i][j] = big.storage[i][j];
-		}
-		// Обратный ход
-		for (int k = n - 1; k > -1; k--) {
-			for (int i = 2 * n - 1; i > -1; i--)
-				big.storage[k][i] = big.storage[k][i] / storage[k][k];
-			for (int i = k - 1; i > -1; i--) {
-				double K = big.storage[i][k] / big.storage[k][k];
-				for (int j = 2 * n - 1; j > -1; j--)
-					big.storage[i][j] = big.storage[i][j]
-							- big.storage[k][j] * K;
-			}
-		}
-		res = big.trim('c', n);
-		*this = res;
+		Matrix res = Matrix::identity(rows);
+		*this = this->solve(res);
 	}
 	return *this;
-}
-ostream& operator<<(ostream &s, const Matrix &m) {
-	s << std::setprecision(6);
-	for (int i = 0; i < m.rows; ++i) {
-		s << "|";
-		for (int j = 0; j < m.cols; ++j)
-			s << ' ' << std::setw(6) << m.storage[i][j];
-		s << " |" << endl;
-	}
-	return s;
 }
 

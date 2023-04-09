@@ -14,9 +14,9 @@ int main (int argc, char** argv) {
 	Matrix D = A + B;
 	C += B;
 	C = (A / B);
-	Matrix E = C.trim('r', 0);
+	Matrix E = A * B;
 	E = ~A;
-	cout << E << endl;
+	cout << E[1][1] << endl;
 
 
 	return 0;

@@ -35,35 +35,16 @@ class Matrix {
 	int cols; // количество столбцов
 	double **storage; // динамический массив для элементов матрицы
 public:
+	// Variant 1
 	static double EPS;
-	// Методы надкласса
 	Matrix();
 	Matrix(const Matrix &other);
 	virtual ~Matrix();
-	// Подкласс и связанные с ним методы
-	class Row {
-		int cols;
-		double *&rows;
-	public:
-		Row(int row, int cols, double **p) :
-				rows(p[row - 1]) {
-			this->cols = cols;
-		}
-		double& operator[](int i) {
-			return rows[i - 1];
-		}
-	};
-
-	Row operator[](int i) {
-		return Row(i, cols, storage);
-	}
-
 	Matrix(int n, int m);	//n m Matrix constructor
 	Matrix(double); //1*1 Matrix constructor
 	Matrix(double*, int m);	// row vector
 	Matrix(int n, double*);	// column vector
 	Matrix(const char*);		// construction from symbol strings
-
 	static Matrix identity(int n);
 	static Matrix diagonal(double *vals, int n);
 	int row() const {
@@ -77,10 +58,11 @@ public:
 	Matrix operator*(const double &mplier);
 	Matrix& operator*=(const double &mplier);
 	friend ostream& operator<<(ostream &s, const Matrix &M);
-	Matrix operator+(const Matrix &other) const; // TODO matrix + matrix ;
-	Matrix& operator+=(const Matrix &other); // TODO matrix += matrix ;
-	// TODO matrix - matrix ;
-	// TODO matrix -= matrix
+	// Variant 2
+	Matrix operator+(const Matrix &other) const;
+	Matrix& operator+=(const Matrix &other);
+	Matrix operator-(const Matrix &other) const;
+	Matrix& operator-=(const Matrix &other);
 	Matrix operator*(const Matrix&) const;
 	Matrix& operator*=(const Matrix&);
 	Matrix& operator-(void); // unary minus
@@ -88,11 +70,29 @@ public:
 	bool operator!=(const Matrix&) const;
 	Matrix operator|(const Matrix&) const; //add to right
 	Matrix operator/(const Matrix&) const; //add below
-	void swap(int from, int to, const char); // swaps rows or cols;
-	Matrix trim(const char, const int);
-	Matrix& operator~(void); // обратная матрица;
-	double determinant(); // определитель;
-	Matrix solve(); //
+	// Variant 3
+	void swap(int from, int to, const char); // Misc. - swaps rows or cols;
+	Matrix trim(const char, const int); // Misc. - trims matrix
+	Matrix& operator~(void); // Inverse matrix
+	double determinant();
+	Matrix solve(const Matrix &f); // Solve linear system with predifined right side
+	class Row {
+		int cols;
+		double *&rows;
+	public:
+		Row(int row, int cols, double **p) :
+				rows(p[row - 1]) {
+			this->cols = cols;
+		}
+		double& operator[](int i) {
+			return rows[i - 1];
+		}
+	};
+
+	inline Row operator[](int i) {
+		return Row(i, cols, storage);
+	}
+
 };
 
 #endif /* Matrix_HPP_ */
