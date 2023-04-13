@@ -16,13 +16,18 @@ using std::endl;
 using std::string;
 using std::stoi;
 
-bool isDivided(int Nx, int Ny);
+bool isDivided(int I, int K1, int K2) {
+	bool res = false;
+	if (I % (K1 + K2) > K1)
+		res = true;
+	return res;
+
+}
 
 int main(int argc, char **argv) {
 	int Nx, Ny, V, K1, K2;
-	int* input[5] = {&Nx, &Ny, &V, &K1, &K2};\
+	int *input[5] = { &Nx, &Ny, &V, &K1, &K2 };
 	string input_names[5] = { "Nx", "Ny", "V", "K1", "K2" };
-
 
 	switch (argc) {
 	case 1: {
@@ -41,10 +46,40 @@ int main(int argc, char **argv) {
 		std::ifstream f(argv[1]);
 		if (f.is_open()) {
 			try {
-				if (f >> Nx >> Ny >> V >> K1 >> K2;)
-				for (int val = 0; val < )
+				if (f >> Nx >> Ny >> V >> K1 >> K2) {
+					cout << "Five values has been parsed" << endl;
+					for (int val = 0; val < 5; ++val) {
+						cout << input_names[val] << " : " << *input[val]
+								<< endl;
+						if (*input[val] < 0) {
+							string err_mes = "Value" + input_names[val]
+									+ "should be greater than 0";
+							throw std::invalid_argument { err_mes };
+						}
+					}
+				} else if (f >> Nx >> Ny >> V) {
+					cout << "Three values has been parsed" << endl;
+					for (int val = 0; val < 3; ++val) {
+						cout << input_names[val] << " : " << *input[val]
+								<< endl;
+						if (*input[val] < 0) {
+							string err_mes = "Value" + input_names[val]
+									+ "should be greater than 0";
+							throw std::invalid_argument { err_mes };
+						}
+					}
+					if (V != 1 && V != 2)
+						throw std::invalid_argument {
+								"Variant should be equal to 1 or 2" };
+				} else {
+					cerr
+							<< "Not enough arguments. Consider rewriting input file."
+							<< endl;
+				}
+			} catch (const std::invalid_argument &ex) {
+				cerr << "Invalid arguments" << ex.what() << endl;
+				return -3;
 			}
-			catch
 		} else {
 			cerr << "Wrong filename!";
 			return -2;
@@ -54,56 +89,59 @@ int main(int argc, char **argv) {
 		break;
 	case 4: {
 		try {
+			cout << "Three values has been parsed" << endl;
 			Nx = stoi(string(argv[1]));
 			Ny = stoi(string(argv[2]));
 			V = stoi(string(argv[3]));
-			string input_names[5] = { "Nx", "Ny", "V" };
-			int input[5] = { Nx, Ny, V };
-			for (int val = 0; val < sizeof(input) / sizeof(int); ++val)
-				if (val < 0) {
+			for (int val = 0; val < argc - 1; ++val) {
+				cout << input_names[val] << " : " << *input[val] << endl;
+				if (*input[val] < 0) {
 					string err_mes = "Value" + input_names[val]
 							+ "should be greater than 0";
 					throw std::invalid_argument { err_mes };
 				}
-			if (V != 1 || V != 2)
+			}
+			if (V != 1 && V != 2)
 				throw std::invalid_argument {
 						"Variant should be equal to 1 or 2" };
 
 		} catch (const std::invalid_argument &ex) {
-			cerr << "Invalid arguments" << ex.what() << endl;
+			cerr << "Invalid arguments " << ex.what() << endl;
 			return -3;
 		}
 	}
 		break;
 	case 6: {
-			try {
-				Nx = stoi(string(argv[1]));
-				Ny = stoi(string(argv[2]));
-				V = stoi(string(argv[3]));
-				K1 = stoi(string(argv[4]));
-				K2 = stoi(string(argv[5]));
-				string input_names[5] = { "Nx", "Ny", "V", "K1", "K2" };
-				int input[5] = { Nx, Ny, V, K1, K2 };
-				for (int val = 0; val < sizeof(input); ++val)
-					if (val < 0) {
-						string err_mes = "Value" + input_names[val]
-								+ "should be greater than 0";
-						throw std::invalid_argument { err_mes };
-					}
-				if (V != 1 || V != 2)
-					throw std::invalid_argument {
-							"Variant should be equal to 1 or 2" };
-
-			} catch (const std::invalid_argument &ex) {
-				cerr << "Invalid arguments" << ex.what() << endl;
-				return -3;
+		try {
+			cout << "Five values has been parsed" << endl;
+			Nx = stoi(string(argv[1]));
+			Ny = stoi(string(argv[2]));
+			V = stoi(string(argv[3]));
+			K1 = stoi(string(argv[4]));
+			K2 = stoi(string(argv[5]));
+			for (int val = 0; val < argc - 1; ++val) {
+				cout << input_names[val] << " : " << *input[val] << endl;
+				if (*input[val] < 0) {
+					string err_mes = "Value" + input_names[val]
+							+ "should be greater than 0";
+					throw std::invalid_argument { err_mes };
+				}
 			}
+			if (V != 1 && V != 2)
+				throw std::invalid_argument {
+						"Variant should be equal to 1 or 2" };
+
+		} catch (const std::invalid_argument &ex) {
+			cerr << "Invalid arguments " << ex.what() << endl;
+			return -3;
 		}
-			break;
+	}
+		break;
 	default:
 		cerr << "Invalid quantity of arguments";
 		return -4;
 	}
+
 	return 0;
 }
 /*
@@ -244,8 +282,8 @@ int main(int argc, char **argv) {
  for (int in_fix = 0; in_fix < NE_IA.size() - 1; ++in_fix) {
  //берем один узел
  int pos_fix = 0;
- NN_IA[in_fix + 1] += NN_IA[in_fix]; // прибавляем количество прошлых узлов
- NN_IA[in_fix + 1]++; // прибавляем свой собственный узел
+ NN_IA[in_fix + 1] += NN_IA[in_fix];	// прибавляем количество прошлых узлов
+ NN_IA[in_fix + 1]++;	// прибавляем свой собственный узел
  NN_JA[NN_IA[in_fix] + pos_fix] += in_fix;
  pos_fix++;
  size_nnja++;
@@ -269,6 +307,7 @@ int main(int argc, char **argv) {
  }
  }
  }
+
  /*int main() {
  const int dim = Nx * Ny;
  int I_max = Nx * Ny - 1;
