@@ -1,0 +1,44 @@
+FIRST STAGE - THE NODE ADJACENCY EVALUATOR
+
+@Author: Mullin G. D. MSU Sarov student, gr. VM-122
+
+This program does
+1) Construction of simplest mesh - quadric grid, with some elements
+distinguished into triangles cells.
+2) Evaluating the incidence of elements to nodes (EN) and incidence of
+nodes to elements (NE) in CSR format (difficulty O(N)).
+3) Resolving node adjacency (NN) matrix in CSR format (difficulty O(N^2)).
+
+Modes by input args:
+nothing: runs help.
+1, string: file determined mode - the program opens parsed file:
+	"*.txt" 
+3, string: this mode parses the parameters:
+	[Nx] [Ny] [V]
+		Nx - X dimension of grid
+	Ny - Y dimension of grid
+	V - variant of division: 1 - / 2 - \
+								/		\
+	DEFAULT: K1 = 1 , K2 = 1
+5, string: this mode parses the parameters:
+	[Nx] [Ny] [V] [K1] [K2]
+	Nx - X dimension of grid
+	Ny - Y dimension of grid
+	V - variant of division: 1 - / 2 - \
+								/		\
+	K1 - how many times (in order of grid cells) cell not divided
+	K2 - how many times (in order of grid cells) cell divided
+other variants: error
+
+Output: file "output.txt"
+
+Error codes:
+
+1: no args provided, program throws help
+-1: untraceable error
+-2: only argument, wrong path to initials
+-3: arguments conversion to integer numbers was failed or provided variant not equal to 1 or 2
+-4:  
+
+ 
+	
