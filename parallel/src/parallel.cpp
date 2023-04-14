@@ -9,7 +9,10 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-//#include <iterator>
+#include <set>
+#include <ctime>
+
+using std::set;
 using std::vector;
 using std::cout;
 using std::cerr;
@@ -17,16 +20,15 @@ using std::endl;
 using std::string;
 using std::stoi;
 
-#define isDiv(I, K1, K2) (I % (K1 + K2) > K1) ? 1 : 0
+#define isDiv(I, K1, K2) ((I % (K1 + K2) >= K1) ? 1 : 0)
 
-inline bool isDivided(int I, int K1, int K2) {
-	bool res = false;
-	int residue = I % (K1 + K2);
-	if (residue >= K1)
-		res = true;
-	return res;
-
-}
+//inline bool isDivided(int I, int K1, int K2) {
+//	bool res = false;
+//	int residue = I % (K1 + K2);
+//	if (residue >= K1)
+//		res = true;
+//	return res;
+//}
 
 void PrintVector(vector<int> V) {
 	cout << "Print Vector\n";
@@ -40,11 +42,11 @@ void IncidenceEN(vector<int> &EN_IA, // Пустой
 		vector<int> &EN_JA, // Пустой
 		int Nx, int Ny, int K1, int K2, int V) {
 	EN_IA.push_back(0);
-	for (int i = 0; i < Nx; i++) {
-		for (int j = 0; j < Ny; j++) {
+	for (int j = 0; j < Ny; j++) {
+		for (int i = 0; i < Nx; i++) {
 			int I = i + Nx * j;
 			int lu = I + j;
-			if (!isDivided(I, K1, K2)) {
+			if (!isDiv(I, K1, K2)) {
 				EN_IA.push_back(4 + EN_IA.back());
 				EN_JA.push_back(lu);
 				EN_JA.push_back(lu + 1);
@@ -76,57 +78,70 @@ void IncidenceEN(vector<int> &EN_IA, // Пустой
 }
 void IncidenceENtoNE(vector<int> &NE_IA, vector<int> &NE_JA, // Здесь вектора непустые
 		const vector<int> &EN_IA, const vector<int> &EN_JA, int Ne, int Np) {
+//	for (int i = 0; i < EN_IA[Ne]; ++i) {
+//		NE_IA[EN_JA[i] + 1]++;
+//	}
+//
+//	for (int in = 1; in <= Np; ++in) {
+//		NE_IA[in] += NE_IA[in - 1];
+//	}
+//	for (int in = 0; in < Np; ++in)
+//		NE_JA[NE_IA[in + 1] - 1] = 0;
+//
+//	for (int ie = 0; ie <= Ne - 1; ++ie) {
+//		for (int j = EN_IA[ie]; j < EN_IA[ie + 1]; ++j) {
+//			int jn = EN_JA[j];
+//			NE_JA[NE_IA[jn] + NE_JA[(NE_IA[jn + 1] - 1)]++] = ie;
+//		}
+//	}
+	for (int i = 0; i < Np + 1; ++i)
+		NE_IA[i] = 0;
+
 	for (int i = 0; i < EN_IA[Ne]; ++i) {
 		NE_IA[EN_JA[i] + 1]++;
 	}
 
-	for (int in = 1; in <= Np; ++in) {
-		NE_IA[in] += NE_IA[in - 1];
+	for (int i = 1; i < Np + 1; ++i) {
+		NE_IA[i] += NE_IA[i - 1];
 	}
-	for (int in = 0; in < Np; ++in)
-		NE_JA[NE_IA[in + 1] - 1] = 0;
 
-	for (int ie = 0; ie <= Ne - 1; ++ie) {
-		for (int j = EN_IA[ie]; j < EN_IA[ie + 1]; ++j) {
-			int jn = EN_JA[j];
-			NE_JA[NE_IA[jn] + NE_JA[(NE_IA[jn + 1] - 1)]++] = ie;
+	for (int i = 0; i < Ne; ++i) {
+		for (int j = EN_IA[i]; j < EN_IA[i + 1]; ++j) {
+			NE_JA[NE_IA[EN_JA[j]]++] = i;
 		}
 	}
-}
-bool PreventCollisions(const vector<int> &NN_JA, int beg, int end, int check) {
 
+	for (int i = Np; i > 0; --i) {
+		NE_IA[i] = NE_IA[i - 1];
+	}
+	NE_IA[0] = 0;
 }
+
 void AdjacencyNN(vector<int> &NN_IA, vector<int> &NN_JA,
 		const vector<int> &EN_IA, const vector<int> &EN_JA,
 		const vector<int> &NE_IA, const vector<int> &NE_JA) {
-	NN_IA.push_back(0);
-	for (int in_fix = 0; in_fix < NE_IA.size() - 1; ++in_fix) {
-		//NN_JA[NN_IA[in_fix] + pos_fix] += in_fix;
-		int filled = 0;
-		int pos_fix = 0;
-		for (int ie_fix = NE_IA[in_fix]; ie_fix < NE_IA[in_fix + 1]; ++ie_fix) {
+	NN_IA.push_back(0); // В начале всегда нуль
+	for (size_t in_fix = 0; in_fix < NE_IA.size() - 1; ++in_fix) { // Ходим по всем узлам сетки, такие узлы считаем фиксированными
+		NN_IA.push_back(NN_IA.back()); // Закидываем число смежных узлов с прошлого фиксированного узла
+		set<int> its_adj_vals; // создаём множество для записи в него смежных узлов фиксированному узлу
+		for (int ie_fix = NE_IA[in_fix]; ie_fix < NE_IA[in_fix + 1]; ++ie_fix) { // ходим по инцидентным ему элементам
 			int e_fix = NE_JA[ie_fix]; // Элемент который инцидетен ввыбранному узлу
-			for (int in = EN_IA[e_fix]; in < EN_IA[e_fix + 1]; ++in) {
-				for (int ie = NE_IA[EN_JA[in]]; ie < NE_IA[EN_JA[in] + 1];
+			for (int in = EN_IA[e_fix]; in < EN_IA[e_fix + 1]; ++in) { // ходим по другим узлом, которые инцидентны элементам для фиксированного узла
+				for (int ie = NE_IA[EN_JA[in]]; ie < NE_IA[EN_JA[in] + 1]; // смотрим в элементы выбранного узла
 						++ie) {
-					bool was = PreventCollisions(NN_JA, NN_IA[in_fix],
-							NN_IA[in_fix] + filled, EN_JA[in]);
-					if (NE_JA[ie] == NE_JA[ie_fix] && !was) {
-						NN_IA[in_fix + 1]++; // прибавляем смежный узел в количество смежных для фиксированного
-						NN_JA[NN_IA[in_fix] + pos_fix] += EN_JA[in];
-						pos_fix++;
-						//size_nnja++;
-						filled++;
-						goto adj_found;
+					if (NE_JA[ie] == NE_JA[ie_fix]) { // если в инцидентных двум узлам есть одинаковые элементы, то такие узлы смежны
+						size_t s = its_adj_vals.size(); // запоминаем прошлый размер массива
+						its_adj_vals.insert(EN_JA[in]); // закидываем в множество узел, если его ещё там не было
+						if (its_adj_vals.size() != s)
+							++NN_IA.back(); // если узел добавился в множество, то прибавляем количество смежных
+						break;
 					}
-				}
-				adj_found: {
 				}
 			}
 		}
+		// используем итераторы для вставки множества в вектор
+		NN_JA.insert(NN_JA.end(), its_adj_vals.begin(), its_adj_vals.end());
 	}
-
-	//NN_JA.erase(NN_JA.cbegin() + size_nnja, NN_JA.cend());
 }
 
 int main(int argc, char **argv) {
@@ -261,6 +276,7 @@ int main(int argc, char **argv) {
 		cerr << "Invalid quantity of arguments";
 		return -4;
 	}
+	double start = clock();
 	vector<int> en_ia, en_ja, nn_ja, nn_ia;
 	IncidenceEN(en_ia, en_ja, Nx, Ny, K1, K2, V);
 	int nN = (Nx + 1) * (Ny + 1);
@@ -268,13 +284,8 @@ int main(int argc, char **argv) {
 	vector<int> ne_ia(nN + 1), ne_ja(en_ja.size());
 	IncidenceENtoNE(ne_ia, ne_ja, en_ia, en_ja, nE, nN);
 	AdjacencyNN(nn_ia, nn_ja, en_ia, en_ja, ne_ia, ne_ja);
-	PrintVector(en_ia);
-	PrintVector(en_ja);
-	PrintVector(ne_ia);
-	PrintVector(ne_ja);
-//	Step3(NN_IA, NN_JA, NE_IA, NE_JA);
-//	PrintVector(NN_IA);
-//	PrintVector(NN_JA);
+	double stop = clock();
+	cout << "Elapsed time: " << (stop - start) / CLOCKS_PER_SEC << " s."<<endl;
 	return 0;
 }
 
