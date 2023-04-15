@@ -10,7 +10,7 @@
 
 #include "Figure.hpp"
 
-class Triangle: Figure {
+class Triangle: virtual Figure {
 
 };
 

@@ -10,16 +10,13 @@
 
 #include "Figure.hpp"
 
-class Circle: Figure {
-protected:
+class Circle: virtual Figure {
+	Circle() = delete; //
+	Circle(double);
 	double r; // Radius [m]
 public:
-	inline double perimeter() override {
-		return 2 * M_PI * r;
-	}
-	inline double area() override {
-		return M_PI * r * r;
-	}
+	double perimeter() override;
+	double area() override;
 };
 
 #endif /* CIRCLE_HPP_ */

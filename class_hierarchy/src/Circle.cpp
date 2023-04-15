@@ -7,8 +7,13 @@
 
 #include "Circle.hpp"
 
-Circle::Circle() {
-	// TODO Auto-generated constructor stub
-
+Circle::Circle(double r = 1) :
+		r { r } {
+}
+double Circle::perimeter() {
+	return 2 * M_PI * r;
+}
+double Circle::area() {
+	return M_PI * r * r;
 }
 
