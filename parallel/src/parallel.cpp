@@ -8,16 +8,17 @@
 
 #include <iostream>
 #include <fstream>
+#include <ctime>
 #include <vector>
 #include <set>
-#include <ctime>
-
+#include <array>
+using std::string;
 using std::set;
 using std::vector;
+
 using std::cout;
 using std::cerr;
 using std::endl;
-using std::string;
 using std::stoi;
 
 #define isDiv(I, K1, K2) ((I % (K1 + K2) >= K1) ? 1 : 0)
@@ -37,7 +38,11 @@ void PrintVector(vector<int> V) {
 	cout << endl;
 	cout << "---------------\n";
 }
-
+void TopologyOutput(const vector<int> *tops[], const string names[],
+		const char* filename = "input.txt") {
+	std::ofstream of(filename);
+	for (int top = 0; top < )
+}
 void IncidenceEN(vector<int> &EN_IA, // Пустой
 		vector<int> &EN_JA, // Пустой
 		int Nx, int Ny, int K1, int K2, int V) {
@@ -285,7 +290,11 @@ int main(int argc, char **argv) {
 	IncidenceENtoNE(ne_ia, ne_ja, en_ia, en_ja, nE, nN);
 	AdjacencyNN(nn_ia, nn_ja, en_ia, en_ja, ne_ia, ne_ja);
 	double stop = clock();
-	cout << "Elapsed time: " << (stop - start) / CLOCKS_PER_SEC << " s."<<endl;
+	cout << "Elapsed time: " << (stop - start) / CLOCKS_PER_SEC << " s."
+			<< endl;
+	try {
+
+	}
 	return 0;
 }
 
