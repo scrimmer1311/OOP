@@ -1,18 +1,14 @@
-/*
- * Rectangle.cpp
- *
- *  Created on: 5 апр. 2023 г.
- *      Author: george
- */
+#include <Rectangle.hpp>
 
-#include "Rectangle.h"
-
-Rectangle::Rectangle() {
-	// TODO Auto-generated constructor stub
-
+Rectangle::Rectangle(double a = 1.) :
+		a { a } {
 }
-
-Rectangle::~Rectangle() {
-	// TODO Auto-generated destructor stub
+double Rectangle::GetSide() {
+	return a;
 }
-
+double Rectangle::perimeter() {
+	return 4. * a;
+}
+double Rectangle::area() {
+	return a * a;
+}

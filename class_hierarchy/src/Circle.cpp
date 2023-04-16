@@ -7,9 +7,13 @@
 
 #include "Circle.hpp"
 
-Circle::Circle(double r = 1) :
+Circle::Circle(double r = 1.) :
 		r { r } {
 }
+double Circle::GetRadius() {
+	return r;
+}
+
 double Circle::perimeter() {
 	return 2 * M_PI * r;
 }

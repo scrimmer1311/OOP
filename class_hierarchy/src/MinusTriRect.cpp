@@ -6,9 +6,23 @@
  */
 
 #include "MinusTriRect.hpp"
-
-MinusTriRect::MinusTriRect() {
-	// TODO Auto-generated constructor stub
-
+MinusTriRect::MinusTriRect(Rectangle &r, Circle &c) :
+		Circle(c), Rectangle(r), base_figure('r') {
+}
+MinusTriRect::MinusTriRect(Circle &c, Rectangle &r) :
+		Circle(c), Rectangle(r), base_figure('c') {
+}
+double MinusTriRect::perimeter() {
+	return Rectangle::perimeter() + Circle::perimeter();
+}
+double MinusTriRect::area() {
+	switch (base_figure) {
+	case 'c':
+		return Circle::area() - Rectangle::area();
+	case 'r':
+		return Rectangle::area() - Circle::area();
+	default:
+		return 0;
+	}
 }
 

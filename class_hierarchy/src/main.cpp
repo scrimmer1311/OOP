@@ -7,10 +7,17 @@
 //============================================================================
 
 #include <iostream>
-#include "Figure.hpp"
-using namespace std;
+#include "TriOnRect.hpp"
+#include "MinusTriRect.hpp"
 
+using namespace std;
 int main() {
-	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	Rectangle r(2.);
+	Triangle t(3. ,2, 1);
+	TriOnRect tr(t, r);
+	cout << tr.perimeter() << endl;
+	Circle c(5);
+	MinusTriRect cr(c, r);
+	cout << cr.area() << endl;
 	return 0;
 }

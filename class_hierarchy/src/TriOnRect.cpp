@@ -5,5 +5,11 @@
  *      Author: george
  */
 
-#include "TriOnRect.hpp"
+#include "../inc/TriOnRect.hpp"
 
+double TriOnRect::perimeter() {
+		return Triangle::perimeter() + Rectangle::perimeter() - Rectangle::GetSide();
+}
+double TriOnRect::area() {
+	return 0;
+}
