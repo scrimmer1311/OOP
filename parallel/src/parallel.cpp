@@ -15,6 +15,7 @@
 using std::string;
 using std::set;
 using std::vector;
+using std::array;
 
 using std::cout;
 using std::cerr;
@@ -30,18 +31,26 @@ using std::stoi;
 //		res = true;
 //	return res;
 //}
-
-void PrintVector(vector<int> V) {
-	cout << "Print Vector\n";
-	for (size_t i = 0; i < V.size(); i++)
-		cout << V[i] << " ";
-	cout << endl;
-	cout << "---------------\n";
+template<typename T>
+std::ostream& operator<<(std::ostream &os, const vector<T> &vec) {
+	for (size_t i = 0; i < vec.size(); i++) {
+		os << vec[i] << " ";
+		if ((i + 1) % 30 == 0)
+			os << "\n";
+	}
+	os << "\n---------------\n";
+	return os;
 }
-void TopologyOutput(const vector<int> *tops[], const string names[],
-		const char* filename = "input.txt") {
+void TopologyOutput(array<vector<int>*, 6> &tops, array<string, 6> &names,
+		const char *filename = "output.txt") {
 	std::ofstream of(filename);
-	for (int top = 0; top < )
+	if (of.is_open()) {
+		for (size_t top = 0; top < tops.size(); top++) {
+			of << names[top] << ": \n";
+			of << *(tops[top]);
+		}
+	} else
+		cerr << "File hasn't open yet";
 }
 void IncidenceEN(vector<int> &EN_IA, // Пустой
 		vector<int> &EN_JA, // Пустой
@@ -83,43 +92,22 @@ void IncidenceEN(vector<int> &EN_IA, // Пустой
 }
 void IncidenceENtoNE(vector<int> &NE_IA, vector<int> &NE_JA, // Здесь вектора непустые
 		const vector<int> &EN_IA, const vector<int> &EN_JA, int Ne, int Np) {
-//	for (int i = 0; i < EN_IA[Ne]; ++i) {
-//		NE_IA[EN_JA[i] + 1]++;
-//	}
-//
-//	for (int in = 1; in <= Np; ++in) {
-//		NE_IA[in] += NE_IA[in - 1];
-//	}
-//	for (int in = 0; in < Np; ++in)
-//		NE_JA[NE_IA[in + 1] - 1] = 0;
-//
-//	for (int ie = 0; ie <= Ne - 1; ++ie) {
-//		for (int j = EN_IA[ie]; j < EN_IA[ie + 1]; ++j) {
-//			int jn = EN_JA[j];
-//			NE_JA[NE_IA[jn] + NE_JA[(NE_IA[jn + 1] - 1)]++] = ie;
-//		}
-//	}
-	for (int i = 0; i < Np + 1; ++i)
-		NE_IA[i] = 0;
-
 	for (int i = 0; i < EN_IA[Ne]; ++i) {
 		NE_IA[EN_JA[i] + 1]++;
 	}
 
-	for (int i = 1; i < Np + 1; ++i) {
-		NE_IA[i] += NE_IA[i - 1];
+	for (int in = 1; in <= Np; ++in) {
+		NE_IA[in] += NE_IA[in - 1];
 	}
+	for (int in = 0; in < Np; ++in)
+		NE_JA[NE_IA[in + 1] - 1] = 0;
 
-	for (int i = 0; i < Ne; ++i) {
-		for (int j = EN_IA[i]; j < EN_IA[i + 1]; ++j) {
-			NE_JA[NE_IA[EN_JA[j]]++] = i;
+	for (int ie = 0; ie <= Ne - 1; ++ie) {
+		for (int j = EN_IA[ie]; j < EN_IA[ie + 1]; ++j) {
+			int jn = EN_JA[j];
+			NE_JA[NE_IA[jn] + NE_JA[(NE_IA[jn + 1] - 1)]++] = ie;
 		}
 	}
-
-	for (int i = Np; i > 0; --i) {
-		NE_IA[i] = NE_IA[i - 1];
-	}
-	NE_IA[0] = 0;
 }
 
 void AdjacencyNN(vector<int> &NN_IA, vector<int> &NN_JA,
@@ -292,9 +280,11 @@ int main(int argc, char **argv) {
 	double stop = clock();
 	cout << "Elapsed time: " << (stop - start) / CLOCKS_PER_SEC << " s."
 			<< endl;
-	try {
-
-	}
+	array<string, 6> out_names = { "EN_IA", "EN_JA", "NE_IA", "NE_JA", "NN_IA",
+			"NN_JA" };
+	array<vector<int>*, 6> outs = { &en_ia, &en_ja, &ne_ia, &ne_ja, &nn_ia,
+			&nn_ja };
+	TopologyOutput(outs, out_names);
 	return 0;
 }
 
