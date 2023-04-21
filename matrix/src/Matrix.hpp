@@ -2,7 +2,7 @@
  * Matrix.hpp
  *
  *  Created on: Mar 21, 2023
- *      Author: root
+ *      Author: george
  */
 
 #ifndef Matrix_HPP_

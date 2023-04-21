@@ -12,11 +12,15 @@ const int dim = 1;
 double Matrix::EPS = 1.e-6;
 
 double** CreateTwoDimArray(int rows, int cols) {
-	double **storage = new double*[rows];
-	for (int i = 0; i < rows; i++) {
-		storage[i] = new double[cols];
+	try {
+		double **storage = new double*[rows];
+		for (int i = 0; i < rows; i++) {
+			storage[i] = new double[cols];
+		}
+		return storage;
+	} catch (...) {
+		throw MatrixException(MatrixErrCodes::dyn_mem_err);
 	}
-	return storage;
 }
 void EvaluateRows(const char *input, int *rows) {
 	int i = 0;
@@ -33,9 +37,9 @@ void EvaluateRows(const char *input, int *rows) {
 		}
 		i++;
 	}
-	if (r_quotes != l_quotes)
-		cerr << "Invalid input" << endl;
-	else if (l_quotes == 1 || r_quotes == 1)
+	if (r_quotes != l_quotes) {
+		throw MatrixException(MatrixErrCodes::invalid_string);
+	} else if (l_quotes == 1 || r_quotes == 1)
 		*rows = 1;
 	else
 		*rows = l_quotes - 1;
@@ -55,8 +59,9 @@ void EvaluateShape(const char *input, int *rows, int *cols) {
 	else {
 		if ((commas - *rows + 1) % (*rows) == 0)
 			*cols = ((commas - *rows + 1) / (*rows)) + 1;
-		else
-			cerr << "Invalid input" << endl;
+		else {
+			throw MatrixException(MatrixErrCodes::invalid_string);
+		}
 	}
 }
 double** FillTwoDimArray(double **stor, const char *inp) {
@@ -67,39 +72,43 @@ double** FillTwoDimArray(double **stor, const char *inp) {
 	string numba;
 	int row_index, col_index;
 	row_index = col_index = 0;
-	while (input[i] != '\0') {
-		if (input[i] == '{') {
-			i++;
-			do {
-				if (input[i] != ',' || input[i] == '.' || input[i] == '-') {
-					numba += input[i];
-				} else {
-					stor[row_index][col_index] = stod(numba);
-					col_index++;
-					numba.clear();
-				}
+	try {
+		while (input[i] != '\0') {
+			if (input[i] == '{') {
 				i++;
-			} while (input[i] != '}');
-			stor[row_index][col_index] = stod(numba);
-			row_index++;
-			col_index = 0;
-			numba.clear();
+				do {
+					if (input[i] != ',' || input[i] == '.' || input[i] == '-') {
+						numba += input[i];
+					} else {
+						stor[row_index][col_index] = stod(numba);
+						col_index++;
+						numba.clear();
+					}
+					i++;
+				} while (input[i] != '}');
+				stor[row_index][col_index] = stod(numba);
+				row_index++;
+				col_index = 0;
+				numba.clear();
+			}
+			i++;
 		}
-		i++;
+	} catch (...) {
+		throw MatrixException(MatrixErrCodes::invalid_string);
 	}
 	return stor;
 }
 // КОНСТРУКТОРЫ
-Matrix::Matrix::Matrix(int n, int m) :
+Matrix::Matrix(int n, int m) :
 		rows(n), cols(m) {
-// выделим память
+	// выделим память
 	storage = CreateTwoDimArray(rows, cols);
-
-//заполним массив
+	//заполним массив
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < cols; ++j)
 			storage[i][j] = 0.;
 	}
+
 }
 Matrix::Matrix() :
 		Matrix(1, 1) {
@@ -263,7 +272,7 @@ Matrix Matrix::operator*(const double &mplier) {
 	Matrix res(rows, cols);
 	for (int i = 0; i < res.rows; i++) {
 		for (int j = 0; j < res.cols; j++)
-			res.storage[i][j] *= mplier;
+			res.storage[i][j] = storage[i][j] * mplier;
 	}
 	return res;
 }
@@ -433,7 +442,7 @@ Matrix Matrix::solve(const Matrix &f) {
 		// Обратный ход
 		for (int k = big.rows - 1; k >= 0; k--) {
 			for (int i = big.cols - 1; i >= 0; i--)
-				big.storage[k][i] /=  storage[k][k];
+				big.storage[k][i] /= storage[k][k];
 			for (int i = k - 1; i >= 0; i--) {
 				double K = big.storage[i][k] / big.storage[k][k];
 				for (int j = big.cols - 1; j >= 0; j--)

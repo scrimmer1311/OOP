@@ -8,16 +8,55 @@
 #ifndef MATRIX_EXC_HPP_
 #define MATRIX_EXC_HPP_
 
-#include "Matrix.hpp"
-enum class Matr_exc_codes {
+#include <iostream>
+using std::ostream;
 
+enum class MatrixErrCodes {
+	dyn_mem_err,
+	index_out_bounds,
+	invalid_string,
+	incomp_sizes,
+	incorrect_matrix_size,
+	was_del_matrix,
+	unknown
 };
 
-class Matrix_exception {
-	Matr_exc_codes c;
+class MatrixException {
+	MatrixErrCodes code;
 public:
-	Matrix_exception();
-	friend std::ostream& operator<< (std::ostream& s, const Matrix_exception& e);
+	MatrixException(MatrixErrCodes c = MatrixErrCodes::unknown) {
+		code = c;
+	}
+	friend ostream& operator<<(ostream &s, const MatrixException &e);
+};
+
+//Invalid index exception subclass
+class IndexException: public MatrixException {
+	int ind, valid;
+public:
+	IndexException(int i = -1, int v = -1) :
+			MatrixException(MatrixErrCodes::index_out_bounds) {
+		ind = i;
+		valid = v;
+	}
+	friend ostream& operator<<(ostream &s, const IndexException &e);
+};
+
+//Incompatible matrices exception subclass
+class IncompException: public MatrixException {
+	char operation; //'+' / '-' / '*'
+	char category; //'r' for rows, 'c' for columns, 'm' for multiplication
+	int first, second;
+public:
+	IncompException(char oper = '\0', char cat = '\0', int fst = -1, int snd =
+			-1) :
+			MatrixException(MatrixErrCodes::incomp_sizes) {
+		operation = oper;
+		category = cat;
+		first = fst;
+		second = snd;
+	}
+	friend ostream& operator<<(ostream &s, const IncompException &e);
 };
 
 #endif /* MATRIX_EXC_HPP_ */

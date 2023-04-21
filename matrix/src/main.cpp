@@ -11,7 +11,8 @@ int main (int argc, char** argv) {
 	const char* inp2 = "{{7, 6},{55, 4}}";
 
 	Matrix A(inp1), B(inp2), C(Matrix::identity(2));
-	Matrix D = A + B;
+	Matrix D;
+	D = A * 5.;
 	C += B;
 	C = (A / B);
 	Matrix E = A * B;
