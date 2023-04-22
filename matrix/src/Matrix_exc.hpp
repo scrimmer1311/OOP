@@ -10,6 +10,7 @@
 
 #include <iostream>
 using std::ostream;
+using std::string;
 
 enum class MatrixErrCodes {
 	dyn_mem_err,
@@ -17,7 +18,7 @@ enum class MatrixErrCodes {
 	invalid_string,
 	incomp_sizes,
 	incorrect_matrix_size,
-	was_del_matrix,
+	non_square_matrix,
 	unknown
 };
 
@@ -27,7 +28,7 @@ public:
 	MatrixException(MatrixErrCodes c = MatrixErrCodes::unknown) {
 		code = c;
 	}
-	friend ostream& operator<<(ostream &s, const MatrixException &e);
+	friend ostream& operator<<(ostream&, const MatrixException&);
 };
 
 //Invalid index exception subclass
@@ -39,7 +40,7 @@ public:
 		ind = i;
 		valid = v;
 	}
-	friend ostream& operator<<(ostream &s, const IndexException &e);
+	friend ostream& operator<<(ostream&, IndexException&);
 };
 
 //Incompatible matrices exception subclass
@@ -56,7 +57,20 @@ public:
 		first = fst;
 		second = snd;
 	}
-	friend ostream& operator<<(ostream &s, const IncompException &e);
+	friend ostream& operator<<(ostream&, IncompException&);
 };
+class NonSquareException : public MatrixException {
+	string op; // -1 (inverse), solve
+	int r, c;
+public:
+	NonSquareException(string oper = "\0", int row = -1, int col = -1) :
+		MatrixException(MatrixErrCodes::incomp_sizes) {
+		op = oper;
+		r = row;
+		c = col;
+	}
+	friend ostream& operator<<(ostream&, NonSquareException&);
+};
+
 
 #endif /* MATRIX_EXC_HPP_ */

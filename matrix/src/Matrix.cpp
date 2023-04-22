@@ -136,7 +136,7 @@ Matrix::Matrix(const char *input) {
 	storage = FillTwoDimArray(storage, input);
 
 }
-Matrix::Matrix::~Matrix() {
+Matrix::~Matrix() {
 	if (storage != nullptr) {
 		for (int i = 0; i < rows; i++) {
 			delete[] storage[i];
@@ -144,7 +144,7 @@ Matrix::Matrix::~Matrix() {
 		delete[] storage;
 		storage = nullptr;
 	} else
-		cerr << "This object have already been deleted" << endl;
+		cout << "This object have already been deleted" << endl;
 }
 
 Matrix::Matrix(const Matrix &other) {
@@ -179,10 +179,10 @@ Matrix Matrix::diagonal(double *vals, int n) {
 	return res;
 }
 void Matrix::set(const int i, const int j, double val) {
-	if (i > rows || j > cols) {
-		cerr << "Given index is out of bounds!" << endl;
-		return;
-	}
+	if (i > rows)
+		throw IndexException(i, rows);
+	if (j > cols)
+		throw IndexException(j, cols);
 	storage[i - 1][j - 1] = val;
 }
 ostream& operator<<(ostream &s, const Matrix &m) {
@@ -213,6 +213,10 @@ Matrix& Matrix::operator =(const Matrix &other) {
 }
 Matrix Matrix::operator +(const Matrix &other) const {
 	Matrix res(rows, cols);
+	if (rows != other.rows)
+		throw IncompException('+', 'r', rows, other.rows);
+	else if (cols != other.cols)
+		throw IncompException('+', 'c', cols, other.cols);
 	for (int i = 0; i < res.rows; i++) {
 		for (int j = 0; j < res.cols; j++)
 			res.storage[i][j] = storage[i][j] + other.storage[i][j];
@@ -220,6 +224,10 @@ Matrix Matrix::operator +(const Matrix &other) const {
 	return res;
 }
 Matrix& Matrix::operator +=(const Matrix &other) {
+	if (rows != other.rows)
+		throw IncompException('+', 'r', rows, other.rows);
+	else if (cols != other.cols)
+		throw IncompException('+', 'c', cols, other.cols);
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++)
 			storage[i][j] += other.storage[i][j];
@@ -227,6 +235,10 @@ Matrix& Matrix::operator +=(const Matrix &other) {
 	return *this;
 }
 Matrix Matrix::operator -(const Matrix &other) const {
+	if (rows != other.rows)
+		throw IncompException('-', 'r', rows, other.rows);
+	else if (cols != other.cols)
+		throw IncompException('-', 'c', cols, other.cols);
 	Matrix res(rows, cols);
 	for (int i = 0; i < res.rows; i++) {
 		for (int j = 0; j < res.cols; j++)
@@ -234,11 +246,21 @@ Matrix Matrix::operator -(const Matrix &other) const {
 	}
 	return res;
 }
+Matrix& Matrix::operator -=(const Matrix &other) {
+	if (rows != other.rows)
+		throw IncompException('-', 'r', rows, other.rows);
+	else if (cols != other.cols)
+		throw IncompException('-', 'c', cols, other.cols);
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++)
+			storage[i][j] -= other.storage[i][j];
+	}
+	return *this;
+}
 Matrix Matrix::operator*(const Matrix &other) const {
 	Matrix res(rows, other.cols);
 	if (cols != other.rows)
-		cerr
-				<< "When multiplied, matrix 1 rows quantity should be equal with matrix 2 columns quantity";
+		throw IncompException('*', '\0', cols, other.rows);
 	for (int i = 0; i < res.rows; ++i) {
 		for (int j = 0; j < res.cols; ++j) {
 			for (int k = 0; k < rows; ++k)
@@ -250,8 +272,7 @@ Matrix Matrix::operator*(const Matrix &other) const {
 Matrix& Matrix::operator*=(const Matrix &other) {
 	Matrix res(rows, other.cols);
 	if (cols != other.rows)
-		cerr
-				<< "When multiplied, matrix 1 rows quantity should be equal with matrix 2 columns quantity";
+		throw IncompException('*', '\0', cols, other.rows);
 	for (int i = 0; i < res.rows; ++i) {
 		for (int j = 0; j < res.cols; ++j) {
 			for (int k = 0; k < rows; ++k)
@@ -261,13 +282,7 @@ Matrix& Matrix::operator*=(const Matrix &other) {
 	*this = res;
 	return *this;
 }
-Matrix& Matrix::operator -=(const Matrix &other) {
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++)
-			storage[i][j] -= other.storage[i][j];
-	}
-	return *this;
-}
+
 Matrix Matrix::operator*(const double &mplier) {
 	Matrix res(rows, cols);
 	for (int i = 0; i < res.rows; i++) {
@@ -387,9 +402,7 @@ Matrix Matrix::trim(const char which, const int trim_ind) {
 	switch (which) {
 	case 'r':
 		if (trim_ind >= rows)
-			cerr << "Too high index";
-		else if (trim_ind < 0)
-			cerr << "Trim index must be positive";
+			throw IndexException(trim_ind, rows);
 		else {
 			Matrix res(rows - trim_ind, cols);
 			for (int i = 0; i < res.rows; ++i) {
@@ -401,9 +414,7 @@ Matrix Matrix::trim(const char which, const int trim_ind) {
 		break;
 	case 'c':
 		if (trim_ind >= cols)
-			cerr << "Too high index";
-		else if (trim_ind < 0)
-			cerr << "Trim index must be positive";
+			throw IndexException(trim_ind, cols);
 		else {
 			Matrix res(rows, cols - trim_ind);
 			for (int i = 0; i < res.rows; ++i) {
@@ -423,7 +434,7 @@ Matrix Matrix::trim(const char which, const int trim_ind) {
 Matrix Matrix::solve(const Matrix &f) {
 	Matrix big(rows, cols + f.cols);
 	if (rows != cols)
-		cerr << "The Kronecker-Capelli theorem does not hold";
+		throw NonSquareException("solve", rows);
 	else {
 		// Прямой ход
 		big = *this | f;
@@ -454,7 +465,7 @@ Matrix Matrix::solve(const Matrix &f) {
 }
 Matrix& Matrix::operator~() {
 	if (rows != cols)
-		cerr << "Reverse matrix couldn't be got with unequal dimensions";
+		throw NonSquareException("-1", rows, cols);
 	else {
 		Matrix res = Matrix::identity(rows);
 		*this = this->solve(res);
